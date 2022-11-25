@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 const app = express();
@@ -39,6 +39,14 @@ async function run() {
             res.send(result);
         });
 
+        /* get individual category products */
+        app.get('/allcategories/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await categoriesCollection.findOne(query);
+            res.send(result);
+        });
+
         /*---------------productsCollection-----------*/
 
         const productsCollection = client.db('simora-motors').collection('all-products');
@@ -49,6 +57,13 @@ async function run() {
             const result = await productsCollection.find(query).toArray();
             res.send(result);
         });
+
+        app.get('/allproducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.findOne(query);
+            res.send(result);
+        })
     }
     finally {
 
