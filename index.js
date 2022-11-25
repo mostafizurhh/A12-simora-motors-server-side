@@ -64,6 +64,17 @@ async function run() {
             const result = await productsCollection.findOne(query);
             res.send(result);
         })
+
+        /*---------------bookingCollection-----------*/
+
+        const bookingCollection = client.db('simora-motors').collection('bookings');
+
+        /* create booking collection */
+        app.post('/booking', async (req, res) => {
+            const booking = req.body;
+            const result = await bookingCollection.insertOne(booking);
+            res.send(booking)
+        })
     }
     finally {
 
