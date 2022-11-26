@@ -94,10 +94,27 @@ async function run() {
 
         const usersCollection = client.db('simora-motors').collection('users');
 
+        /* create users collection from client side info */
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             res.send(result);
+        })
+
+        /* API to check if a user is admin or not */
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            res.send({ isAdmin: user?.role === 'admin' });
+        })
+
+        /* API to check if a user is Seller or not */
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            res.send({ isSeller: user?.userCategory === 'Seller' });
         })
 
         /*---------------CtaegoriesCollection-----------*/
@@ -116,6 +133,11 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await categoriesCollection.findOne(query);
+
+            /* aggrigate */
+            // const date = req.query.date;
+            // const booking
+
             res.send(result);
         });
 
@@ -175,7 +197,7 @@ async function run() {
         /*---------------paymentCollection-----------*/
 
         /* create Payment collection to save users payment info */
-        const usersPaymentCollection = client.db('simora').collection('userPayment');
+        const usersPaymentCollection = client.db('simora-motors').collection('userPayment');
 
         /* crete API for stripe */
         app.post('/create-payment-intent', verifyJWT, async (req, res) => {
