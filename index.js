@@ -101,6 +101,13 @@ async function run() {
             res.send(result);
         })
 
+        /* (READ) get all registered users data */
+        app.get('/users', async (req, res) => {
+            const query = {};
+            const users = await usersCollection.find(query).toArray();
+            res.send(users);
+        })
+
         /* API to check if a user is admin or not */
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
@@ -115,6 +122,14 @@ async function run() {
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             res.send({ isSeller: user?.userCategory === 'Seller' });
+        })
+
+        /* (DELETE) delete a users data */
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
         })
 
         /*---------------CtaegoriesCollection-----------*/
