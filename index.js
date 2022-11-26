@@ -47,24 +47,30 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 /* mongodb CRUD operation */
 async function run() {
     try {
-        /*---------------CtaegoriesCollection-----------*/
 
-        const categoriesCollection = client.db('simora-motors').collection('product-categories');
+        /*---------------Admin Verification-----------*/
+        const verifyAdmin = async (req, res, next) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
 
-        /* (READ) get all product categories */
-        app.get('/allcategories', async (req, res) => {
-            const query = {};
-            const result = await categoriesCollection.find(query).toArray();
-            res.send(result);
-        });
+            if (user?.role !== 'admin') {
+                return res.status(401).send({ message: 'Unauthorized Access' })
+            }
+            next()
+        }
 
-        /* get individual category products */
-        app.get('/allcategories/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const result = await categoriesCollection.findOne(query);
-            res.send(result);
-        });
+        /*---------------Seller Verification-----------*/
+        const verifySeller = async (req, res, next) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+
+            if (user?.role !== 'admin' || user?.userCategory !== 'Seller') {
+                return res.status(401).send({ message: 'Unauthorized Access' })
+            }
+            next()
+        }
 
         /*---------------JWT Verification-----------*
 
@@ -83,6 +89,7 @@ async function run() {
 
 
         /*---------------usersCollection-----------*/
+
         const usersCollection = client.db('simora-motors').collection('users');
 
         app.post('/users', async (req, res) => {
@@ -90,6 +97,25 @@ async function run() {
             const result = await usersCollection.insertOne(user);
             res.send(result);
         })
+
+        /*---------------CtaegoriesCollection-----------*/
+
+        const categoriesCollection = client.db('simora-motors').collection('product-categories');
+
+        /* (READ) get all product categories */
+        app.get('/allcategories', async (req, res) => {
+            const query = {};
+            const result = await categoriesCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        /* get individual category products */
+        app.get('/allcategories/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await categoriesCollection.findOne(query);
+            res.send(result);
+        });
 
 
         /*---------------productsCollection-----------*/
@@ -120,6 +146,28 @@ async function run() {
             const result = await bookingCollection.insertOne(booking);
             res.send(booking)
         })
+
+        /* get all booking data */
+        app.get('/booking', async (req, res) => {
+            const query = {};
+            const result = await bookingCollection.find(query).toArray();
+            res.send(result)
+        })
+
+        /* get specific user's booking and verify JWT */
+        app.get('/booking', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+            // console.log(email);
+            const decodedEmail = req.decoded.email;
+            // console.log(decodedEmail)
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'Forbidden Access' });
+            }
+
+            const query = { email: email };
+            const result = await bookingCollection.find(query).toArray();
+            res.send(result)
+        });
     }
     finally {
 
