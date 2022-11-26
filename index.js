@@ -143,21 +143,14 @@ async function run() {
         const bookingCollection = client.db('simora-motors').collection('bookings');
 
         /* create booking collection */
-        app.post('/booking', async (req, res) => {
+        app.post('/bookings', async (req, res) => {
             const booking = req.body;
             const result = await bookingCollection.insertOne(booking);
-            res.send(booking)
-        })
-
-        /* get all booking data */
-        app.get('/booking', async (req, res) => {
-            const query = {};
-            const result = await bookingCollection.find(query).toArray();
             res.send(result)
         })
 
         /* get specific user's booking and verify JWT */
-        app.get('/booking', verifyJWT, async (req, res) => {
+        app.get('/bookings', verifyJWT, async (req, res) => {
             const email = req.query.email;
             // console.log(email);
             const decodedEmail = req.decoded.email;
@@ -172,7 +165,7 @@ async function run() {
         });
 
         /* get single booking info of a service */
-        app.get('/booking/:id', async (req, res) => {
+        app.get('/bookings/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await bookingCollection.findOne(query);
