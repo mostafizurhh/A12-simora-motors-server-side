@@ -190,19 +190,83 @@ async function run() {
 
         /*---------------productsCollection-----------*/
 
-        const productsCollection = client.db('simora-motors').collection('all-products');
+        // const productsCollection = client.db('simora-motors').collection('all-products');
 
-        /* (READ) get all product data */
-        app.get('/allproducts', async (req, res) => {
-            const query = {};
-            const result = await productsCollection.find(query).toArray();
+        // /* (READ) get all product data */
+        // app.get('/allproducts', async (req, res) => {
+        //     const query = {};
+        //     const result = await productsCollection.find(query).toArray();
+        //     res.send(result);
+        // });
+
+        // app.get('/allproducts/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const query = { _id: ObjectId(id) };
+        //     const result = await productsCollection.findOne(query);
+        //     res.send(result);
+        // })
+
+        // app.get('/allproducts/disel', async (req, res) => {
+        //     const query = { type: 'Disel' };
+        //     const result = await productsCollection.find(query).toArray();
+        //     res.send(result);
+        // })
+
+        /*---------------advertisedItemsCollection-----------*/
+        const advertisedItemsCollection = client.db('simora-motors').collection('advertisedItems');
+
+        /* create advertised product collection */
+        app.post('/advertised', async (req, res) => {
+            const advertised = req.body;
+            const result = await advertisedItemsCollection.insertOne(advertised);
+            const id = advertised.categoryId;
+            const query = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    products: advertised
+                }
+            }
+            const updatedResult = await categoriesCollection.updateOne(query, updatedDoc);
+
             res.send(result);
+        })
+
+        /* show advertised items on home page */
+        app.get('/advertisedItems', async (req, res) => {
+            const query = {};
+            const cursor = advertisedItemsCollection.find(query).sort({ date: -1 });
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        /* get specific user's advertised items and verify JWT */
+        app.get('/advertised', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+            // console.log(email);
+            const decodedEmail = req.decoded.email;
+            // console.log(decodedEmail)
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'Forbidden Access' });
+            }
+
+            const query = { email: email };
+            const result = await advertisedItemsCollection.find(query).sort({ date: -1 }).toArray();
+            res.send(result)
         });
 
-        app.get('/allproducts/:id', async (req, res) => {
+        /* get single advertised data */
+        app.get('/advertised/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const result = await productsCollection.findOne(query);
+            const result = await advertisedItemsCollection.findOne(query);
+            res.send(result)
+        })
+
+        /* delete a advertised item */
+        app.delete('/advertised/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await advertisedItemsCollection.deleteOne(query);
             res.send(result);
         })
 
