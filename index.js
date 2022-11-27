@@ -119,18 +119,31 @@ async function run() {
             res.send(sellers);
         })
 
-        /* update seller status */
+        /* update buyer and seller status */
         app.put('/users/admin/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             const options = { upsert: true };
             const updatedDoc = {
                 $set: {
-                    status: 'verified',
-                    userCategory: 'Buyer'
+                    status: 'verified'
                 }
             };
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            res.send(result)
+        })
+
+        /* update userCategory for googleuser */
+        app.patch('/users/admin/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            // const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    userCategory: 'Buyer'
+                }
+            };
+            const result = await usersCollection.updateOne(filter, updatedDoc);
             res.send(result)
         })
 
