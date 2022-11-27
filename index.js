@@ -1,9 +1,9 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config()
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-// const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
-const stripe = require("stripe")("sk_test_51M5xTOEjKmhiTrYBMHYiby5C3o2rP0RApy4qROYcuPMbgY8V97lON3nzB1No7YQRkn4uhxR3T4byVuwRPOyk7yuc000dfIMeod")
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
 
 const app = express();
@@ -42,7 +42,7 @@ function verifyJWT(req, res, next) {
 }
 
 /* mongodb connection */
-require('dotenv').config()
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.mniec4l.mongodb.net/?retryWrites=true&w=majority`
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -56,19 +56,7 @@ async function run() {
             const query = { email: decodedEmail };
             const user = await usersCollection.findOne(query);
 
-            if (user?.role !== 'admin') {
-                return res.status(401).send({ message: 'Unauthorized Access' })
-            }
-            next()
-        }
-
-        /*---------------Seller Verification-----------*/
-        const verifySeller = async (req, res, next) => {
-            const decodedEmail = req.decoded.email;
-            const query = { email: decodedEmail };
-            const user = await usersCollection.findOne(query);
-
-            if (user?.role !== 'admin' || user?.userCategory !== 'Seller') {
+            if (user?.userCategory !== 'admin') {
                 return res.status(401).send({ message: 'Unauthorized Access' })
             }
             next()
@@ -113,7 +101,7 @@ async function run() {
             const email = req.params.email;
             const query = { email: email };
             const user = await usersCollection.findOne(query);
-            res.send({ isAdmin: user?.role === 'admin' });
+            res.send({ isAdmin: user?.userCategory === 'admin' });
         })
 
         /* API to check if a user is Seller or not */
@@ -122,6 +110,36 @@ async function run() {
             const query = { email: email };
             const user = await usersCollection.findOne(query);
             res.send({ isSeller: user?.userCategory === 'Seller' });
+        })
+
+        /* get all sellers */
+        app.get('/users/seller', async (req, res) => {
+            const query = { userCategory: 'Seller' };
+            const sellers = await usersCollection.find(query).toArray();
+            res.send(sellers);
+        })
+
+        /* update seller status */
+        app.put('/users/admin/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    status: 'verified',
+                    userCategory: 'Buyer'
+                }
+            };
+            const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            res.send(result)
+        })
+
+
+        /* get all buyers */
+        app.get('/users/buyer', async (req, res) => {
+            const query = { userCategory: 'Buyer' };
+            const buyer = await usersCollection.find(query).toArray();
+            res.send(buyer);
         })
 
         /* (DELETE) delete a users data */
