@@ -166,6 +166,7 @@ async function run() {
         /*---------------CtaegoriesCollection-----------*/
 
         const categoriesCollection = client.db('simora-motors').collection('product-categories');
+        // const categoriesCollection = client.db('simora-motors').collection('allcategories');
 
         /* (READ) get all product categories */
         app.get('/allcategories', async (req, res) => {
@@ -186,6 +187,16 @@ async function run() {
 
             res.send(result);
         });
+
+
+        // /*---------------diselcarsCollection-----------*/
+        // const diselcarsCollection = client.db('simora-motors').collection('diselcars')
+
+        // app.get('/diselcars', async (req, res) => {
+        //     const query = {}
+        //     const result = await diselcarsCollection.find(query).toArray()
+        //     res.send(result)
+        // })
 
 
         /*---------------productsCollection-----------*/
@@ -219,14 +230,14 @@ async function run() {
         app.post('/advertised', async (req, res) => {
             const advertised = req.body;
             const result = await advertisedItemsCollection.insertOne(advertised);
-            const id = advertised.categoryId;
-            const query = { _id: ObjectId(id) };
-            const updatedDoc = {
-                $set: {
-                    products: advertised
-                }
-            }
-            const updatedResult = await categoriesCollection.updateOne(query, updatedDoc);
+            // const id = advertised.categoryId;
+            // const query = { _id: ObjectId(id) };
+            // const updatedDoc = {
+            //     $set: {
+            //         products: advertised
+            //     }
+            // }
+            // const updatedResult = await categoriesCollection.updateOne(query, updatedDoc);
 
             res.send(result);
         })
