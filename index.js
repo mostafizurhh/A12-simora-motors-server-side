@@ -180,11 +180,6 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await categoriesCollection.findOne(query);
-
-            /* aggrigate */
-            // const date = req.query.date;
-            // const booking
-
             res.send(result);
         });
 
@@ -195,15 +190,6 @@ async function run() {
         app.post('/advertised', async (req, res) => {
             const advertised = req.body;
             const result = await advertisedItemsCollection.insertOne(advertised);
-            // const id = advertised.categoryId;
-            // const query = { _id: ObjectId(id) };
-            // const updatedDoc = {
-            //     $set: {
-            //         products: advertised
-            //     }
-            // }
-            // const updatedResult = await categoriesCollection.updateOne(query, updatedDoc);
-
             res.send(result);
         })
 
@@ -368,7 +354,6 @@ async function run() {
                 }
             }
             const updatedResult = await bookingCollection.updateOne(query, updatedDoc);
-            // const updatedProductResult = await advertisedItemsCollection.updateOne(query, updatedDoc);
             res.send(result)
         })
 
