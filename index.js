@@ -288,6 +288,16 @@ async function run() {
         /* create booking collection */
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
+            const query = {
+                bookingDate: booking.bookingDate,
+                name: booking.name,
+                email: booking.email
+            }
+            const alreadyBooked = await bookingCollection.find(query).toArray();
+            if (alreadyBooked.length) {
+                const message = `You already have a bookiong on ${booking.bookingDate} for ${booking.name}`;
+                return res.send({ acknowledged: false, message });
+            }
             const result = await bookingCollection.insertOne(booking);
             res.send(result)
         })
