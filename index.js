@@ -120,7 +120,7 @@ async function run() {
         })
 
         /* update buyer and seller status */
-        app.put('/users/admin/:id', async (req, res) => {
+        app.put('/users/admin/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             const options = { upsert: true };
@@ -134,7 +134,7 @@ async function run() {
         })
 
         /* update userCategory for googleuser */
-        app.patch('/users/admin/:id', async (req, res) => {
+        app.patch('/users/admin/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             // const options = { upsert: true };
@@ -156,7 +156,7 @@ async function run() {
         })
 
         /* (DELETE) delete a users data */
-        app.delete('/users/:id', async (req, res) => {
+        app.delete('/users/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await usersCollection.deleteOne(query);
