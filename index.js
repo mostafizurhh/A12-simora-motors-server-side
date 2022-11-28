@@ -253,6 +253,31 @@ async function run() {
             res.send(result);
         })
 
+        app.put('/advertised/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const options = { upsert: true }
+            const updatedDoc = {
+                $set: {
+                    saleStatus: 'Sold'
+                }
+            }
+            const result = await advertisedItemsCollection.updateOne(query, updatedDoc, options);
+            res.send(result);
+        })
+        app.patch('/advertised/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const options = { upsert: true }
+            const updatedDoc = {
+                $set: {
+                    saleStatus: 'Available'
+                }
+            }
+            const result = await advertisedItemsCollection.updateOne(query, updatedDoc, options);
+            res.send(result);
+        })
+
         /*---------------bookingCollection-----------*/
 
         const bookingCollection = client.db('simora-motors').collection('bookings');
@@ -318,10 +343,11 @@ async function run() {
             const updatedDoc = {
                 $set: {
                     paid: true,
-                    transactionId: payment.transactionId
+                    transactionId: payment.transactionId,
                 }
             }
             const updatedResult = await bookingCollection.updateOne(query, updatedDoc);
+            // const updatedProductResult = await advertisedItemsCollection.updateOne(query, updatedDoc);
             res.send(result)
         })
 
