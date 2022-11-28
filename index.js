@@ -188,42 +188,7 @@ async function run() {
             res.send(result);
         });
 
-
-        // /*---------------diselcarsCollection-----------*/
-        // const diselcarsCollection = client.db('simora-motors').collection('diselcars')
-
-        // app.get('/diselcars', async (req, res) => {
-        //     const query = {}
-        //     const result = await diselcarsCollection.find(query).toArray()
-        //     res.send(result)
-        // })
-
-
-        /*---------------productsCollection-----------*/
-
-        // const productsCollection = client.db('simora-motors').collection('all-products');
-
-        // /* (READ) get all product data */
-        // app.get('/allproducts', async (req, res) => {
-        //     const query = {};
-        //     const result = await productsCollection.find(query).toArray();
-        //     res.send(result);
-        // });
-
-        // app.get('/allproducts/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const query = { _id: ObjectId(id) };
-        //     const result = await productsCollection.findOne(query);
-        //     res.send(result);
-        // })
-
-        // app.get('/allproducts/disel', async (req, res) => {
-        //     const query = { type: 'Disel' };
-        //     const result = await productsCollection.find(query).toArray();
-        //     res.send(result);
-        // })
-
-        /*---------------advertisedItemsCollection-----------*/
+        /*----------advertisedItemsCollection---------*/
         const advertisedItemsCollection = client.db('simora-motors').collection('advertisedItems');
 
         /* create advertised product collection */
@@ -244,6 +209,13 @@ async function run() {
 
         /* show advertised items on home page */
         app.get('/advertisedItems', async (req, res) => {
+            const query = {};
+            const cursor = advertisedItemsCollection.find(query).sort({ date: -1 });
+            const result = await cursor.limit(3).toArray();
+            res.send(result);
+        })
+
+        app.get('/alladvertisedItems', async (req, res) => {
             const query = {};
             const cursor = advertisedItemsCollection.find(query).sort({ date: -1 });
             const result = await cursor.toArray();
@@ -359,3 +331,39 @@ async function run() {
     }
 }
 run().catch(console.log)
+
+
+
+// /*-------------diselcarsCollection-----------*/
+        // const diselcarsCollection = client.db('simora-motors').collection('diselcars')
+
+        // app.get('/diselcars', async (req, res) => {
+        //     const query = {}
+        //     const result = await diselcarsCollection.find(query).toArray()
+        //     res.send(result)
+        // })
+
+
+/*---------------productsCollection-----------*/
+
+        // const productsCollection = client.db('simora-motors').collection('all-products');
+
+        // /* (READ) get all product data */
+        // app.get('/allproducts', async (req, res) => {
+        //     const query = {};
+        //     const result = await productsCollection.find(query).toArray();
+        //     res.send(result);
+        // });
+
+        // app.get('/allproducts/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const query = { _id: ObjectId(id) };
+        //     const result = await productsCollection.findOne(query);
+        //     res.send(result);
+        // })
+
+        // app.get('/allproducts/disel', async (req, res) => {
+        //     const query = { type: 'Disel' };
+        //     const result = await productsCollection.find(query).toArray();
+        //     res.send(result);
+        // })
