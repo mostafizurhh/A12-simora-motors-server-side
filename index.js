@@ -211,16 +211,16 @@ async function run() {
         app.get('/advertisedItems', async (req, res) => {
             const query = {};
             const cursor = advertisedItemsCollection.find(query).sort({ date: -1 });
-            const result = await cursor.limit(3).toArray();
-            res.send(result);
-        })
-
-        app.get('/alladvertisedItems', async (req, res) => {
-            const query = {};
-            const cursor = advertisedItemsCollection.find(query).sort({ date: -1 });
             const result = await cursor.toArray();
             res.send(result);
         })
+
+        // app.get('/alladvertisedItems', async (req, res) => {
+        //     const query = {};
+        //     const cursor = advertisedItemsCollection.find(query).sort({ date: -1 });
+        //     const result = await cursor.toArray();
+        //     res.send(result);
+        // })
 
         /* get specific user's advertised items and verify JWT */
         app.get('/advertised', verifyJWT, async (req, res) => {
@@ -253,6 +253,7 @@ async function run() {
             res.send(result);
         })
 
+        /* update product's currentSaleStatus */
         app.put('/advertised/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -265,6 +266,8 @@ async function run() {
             const result = await advertisedItemsCollection.updateOne(query, updatedDoc, options);
             res.send(result);
         })
+
+        /* change product's saleStatus*/
         app.patch('/advertised/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -309,6 +312,14 @@ async function run() {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await bookingCollection.findOne(query);
+            res.send(result);
+        })
+
+        /* delete a booking data */
+        app.delete('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await bookingCollection.deleteOne(query);
             res.send(result);
         })
 
