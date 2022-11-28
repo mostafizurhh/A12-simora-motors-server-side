@@ -320,6 +320,40 @@ async function run() {
         })
 
         /*---------------paymentCollection-----------*/
+        const reportedItemCollection = client.db('simora-motors').collection('reporteditems');
+
+        /* create reported items collection from client side */
+        app.post('/reporteditems', async (req, res) => {
+            const reported = req.body;
+            const result = await reportedItemCollection.insertOne(reported);
+            res.send(result);
+        })
+
+        /* get all reported items */
+        app.get('/reporteditems', async (req, res) => {
+            const query = {};
+            const result = await reportedItemCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        /* get a reported items */
+        app.get('/reporteditems/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await reportedItemCollection.findOne(query);
+            res.send(result);
+        })
+
+        /* delete a reported items */
+        app.delete('/reporteditems/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await reportedItemCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
+        /*---------------paymentCollection-----------*/
 
         /* create Payment collection to save users payment info */
         const usersPaymentCollection = client.db('simora-motors').collection('userPayment');
