@@ -190,6 +190,64 @@ async function run() {
         app.post('/advertised', async (req, res) => {
             const advertised = req.body;
             const result = await advertisedItemsCollection.insertOne(advertised);
+
+            /* prevent duplicate booking */
+            // const findBooked = {
+            //     name: booking.name,
+            //     email: booking.email
+            // }
+            // const alreadyBooked = await bookingCollection.find(findBooked).toArray();
+            // if (alreadyBooked.length) {
+            //     const message = `You already booked this item.`;
+            //     return res.send({ acknowledged: false, message });
+            // }
+
+            /* add a product dynamically in categoryCollection's products array. which structure is >> [array{object[array]}]. 
+            1. 1st filter data between categoriesCollection and advertisedItemsCollection using the field categoryType & advertised.type using findOne() method
+            2. then apply if condition to find the match >> do a query same as filter 
+            3. options{upsert:true} 
+            4. updatedDoc ={$push > to add object/array {name of array/object (products) > {$each - takes an array as value which allows to push multiple values inside an array oor object > to update [{}]}}} 
+            5. whole pattern >> updatedDoc={$push{products{$each[{}]}}}
+            */
+
+            const filter = {
+                categoryType: advertised.type
+            };
+            const existingCategory = await categoriesCollection.findOne(filter)
+            // console.log(existingCategory)
+            if (existingCategory.categoryType === advertised.type) {
+                const query = { categoryType: advertised.type };
+                const options = { upsert: true }
+                const updatedDoc = {
+                    $push: {
+                        products: {
+                            $each: [
+                                {
+                                    productId: advertised._id,
+                                    name: advertised.name,
+                                    image: advertised.image,
+                                    resale: advertised.resale,
+                                    original: advertised.original,
+                                    year: advertised.year,
+                                    month: advertised.month,
+                                    type: advertised.type,
+                                    condition: advertised.condition,
+                                    milage: advertised.milage,
+                                    seller: advertised.seller,
+                                    email: advertised.email,
+                                    location: advertised.location,
+                                    phone: advertised.phone,
+                                    photoURL: advertised.photoURL,
+                                    saleStatus: advertised.saleStatus,
+                                    posted: new Date()
+                                }
+                            ]
+                        }
+                    }
+                }
+                const updatedResult = await categoriesCollection.updateOne(query, updatedDoc, options)
+                console.log('category collection', updatedResult)
+            }
             res.send(result);
         })
 
@@ -200,13 +258,6 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result);
         })
-
-        // app.get('/alladvertisedItems', async (req, res) => {
-        //     const query = {};
-        //     const cursor = advertisedItemsCollection.find(query).sort({ date: -1 });
-        //     const result = await cursor.toArray();
-        //     res.send(result);
-        // })
 
         /* get specific user's advertised items and verify JWT */
         app.get('/advertised', verifyJWT, async (req, res) => {
@@ -275,13 +326,12 @@ async function run() {
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
             const query = {
-                bookingDate: booking.bookingDate,
                 name: booking.name,
                 email: booking.email
             }
             const alreadyBooked = await bookingCollection.find(query).toArray();
             if (alreadyBooked.length) {
-                const message = `You already have a bookiong on ${booking.bookingDate} for ${booking.name}`;
+                const message = `You already booked this item.`;
                 return res.send({ acknowledged: false, message });
             }
             const result = await bookingCollection.insertOne(booking);
@@ -291,9 +341,9 @@ async function run() {
         /* get specific user's booking and verify JWT */
         app.get('/bookings', verifyJWT, async (req, res) => {
             const email = req.query.email;
-            // console.log(email);
+            //console.log('email', email);
             const decodedEmail = req.decoded.email;
-            // console.log(decodedEmail)
+            //console.log('decoded', decodedEmail)
             if (email !== decodedEmail) {
                 return res.status(403).send({ message: 'Forbidden Access' });
             }
