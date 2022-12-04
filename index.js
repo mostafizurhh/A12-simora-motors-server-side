@@ -191,18 +191,7 @@ async function run() {
             const advertised = req.body;
             const result = await advertisedItemsCollection.insertOne(advertised);
 
-            /* prevent duplicate booking */
-            // const findBooked = {
-            //     name: booking.name,
-            //     email: booking.email
-            // }
-            // const alreadyBooked = await bookingCollection.find(findBooked).toArray();
-            // if (alreadyBooked.length) {
-            //     const message = `You already booked this item.`;
-            //     return res.send({ acknowledged: false, message });
-            // }
-
-            /* add a product dynamically in categoryCollection's products array. which structure is >> [array{object[array]}]. 
+            /* add a product dynamically in categoryCollection's products array. which structure is >> [array{object[array{object}]}]. 
             1. 1st filter data between categoriesCollection and advertisedItemsCollection using the field categoryType & advertised.type using findOne() method
             2. then apply if condition to find the match >> do a query same as filter 
             3. options{upsert:true} 
@@ -223,7 +212,7 @@ async function run() {
                         products: {
                             $each: [
                                 {
-                                    productId: advertised._id,
+                                    _id: advertised._id,
                                     name: advertised.name,
                                     image: advertised.image,
                                     resale: advertised.resale,
@@ -246,7 +235,7 @@ async function run() {
                     }
                 }
                 const updatedResult = await categoriesCollection.updateOne(query, updatedDoc, options)
-                console.log('category collection', updatedResult)
+                // console.log('category collection', updatedResult)
             }
             res.send(result);
         })
@@ -286,6 +275,7 @@ async function run() {
         app.delete('/advertised/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
+            console.log(query)
             const result = await advertisedItemsCollection.deleteOne(query);
             res.send(result);
         })
