@@ -203,7 +203,6 @@ async function run() {
                 categoryType: advertised.type
             };
             const existingCategory = await categoriesCollection.findOne(filter)
-            // console.log(existingCategory)
             if (existingCategory.categoryType === advertised.type) {
                 const query = { categoryType: advertised.type };
                 const options = { upsert: true }
@@ -234,8 +233,7 @@ async function run() {
                         }
                     }
                 }
-                const updatedResult = await categoriesCollection.updateOne(query, updatedDoc, options)
-                // console.log('category collection', updatedResult)
+                const updatedResult = await categoriesCollection.updateOne(query, updatedDoc, options);
             }
             res.send(result);
         })
@@ -259,7 +257,7 @@ async function run() {
             }
 
             const query = { email: email };
-            const result = await advertisedItemsCollection.find(query).sort({ date: -1 }).toArray();
+            const result = await advertisedItemsCollection.find(query).toArray();
             res.send(result)
         });
 
