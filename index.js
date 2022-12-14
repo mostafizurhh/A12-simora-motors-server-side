@@ -14,7 +14,7 @@ app.use(express.json());
 
 
 app.get('/', async (req, res) => {
-    res.send('Server is running...........')
+    res.send('Simora Motors Server is running...........')
 })
 
 app.listen(port, () => {
